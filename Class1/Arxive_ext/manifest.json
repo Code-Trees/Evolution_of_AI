@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Arxiv Research Assistant",
+    "version": "1.0",
+    "description": "Automatically searches Arxiv for new research papers based on saved keywords.",
+    "permissions": [
+      "storage"
+    ],
+    "host_permissions": ["https://arxiv.org/*"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html"
+    }
+  }
