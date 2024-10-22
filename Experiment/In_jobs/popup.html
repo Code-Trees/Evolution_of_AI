@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LinkedIn Job Search Assistant</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    input, button {
+      width: 100%;
+      margin-top: 10px;
+    }
+    #status {
+      margin-top: 10px;
+      font-style: italic;
+    }
+    #jobList {
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .job-item {
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
+    .job-title {
+      font-weight: bold;
+      color: #0073b1;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .job-company {
+      font-weight: bold;
+    }
+    .job-location, .job-metadata {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h2>LinkedIn Job Search Assistant</h2>
+  <input type="text" id="jobRole" placeholder="Enter job role">
+  <input type="text" id="location" placeholder="Enter location">
+  <button id="saveSettings">Save Settings</button>
+  <button id="checkNow">Check for Jobs Now</button>
+  <p id="status"></p>
+  <div id="jobList"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
