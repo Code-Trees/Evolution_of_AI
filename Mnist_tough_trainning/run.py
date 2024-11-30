@@ -15,7 +15,7 @@ import os
 import sys
 from rf_calc import receptive_field
 from torchsummary import summary
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 import torchvision
 from itertools import islice
 import datetime
@@ -48,34 +48,27 @@ def run_model(model,device,batch_size,epochs,optimizer,scheduler,use_scheduler,b
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     run_name = f"experiment_{version}_{timestamp}"
     
-    # Initialize TensorBoard writer with versioned log directory
-    writer = SummaryWriter(f'runs/{run_name}')
-    
-    # Log hyperparameters
-    # writer.add_text('Model/Architecture', str(model))
-    # writer.add_text('Model/Optimizer', str(optimizer))
-    writer.add_text('Model/Scheduler', str(scheduler) if use_scheduler else "None")
-    writer.add_text('Training/BatchSize', str(batch_size))
-    writer.add_text('Training/Epochs', str(epochs))
+    # Comment out TensorBoard writer initialization and logging
+    # writer = SummaryWriter(f'runs/{run_name}')
+    # writer.add_text('Model/Scheduler', str(scheduler) if use_scheduler else "None")
+    # writer.add_text('Training/BatchSize', str(batch_size))
+    # writer.add_text('Training/Epochs', str(epochs))
     
     current_lr = optimizer.param_groups[0]['lr']
     
-    # Log model architecture
-    dummy_input = torch.zeros((1, 1, 28, 28)).to(device)
-    writer.add_graph(model, dummy_input)
+    # Comment out model architecture logging
+    # dummy_input = torch.zeros((1, 1, 28, 28)).to(device)
+    # writer.add_graph(model, dummy_input)
     
-    # Log sample images with transforms
-    def log_transforms():
-        # Get a small batch of training data
-        images, labels = next(iter(train_loader))
-        img_grid = torchvision.utils.make_grid(images[:25])
-        writer.add_image('mnist_images', img_grid)
-        
-        # Log transform parameters as text
-        transform_params = str(data_loader.train_transforms)
-        writer.add_text('transforms/train', transform_params)
+    # Comment out transform logging function
+    # def log_transforms():
+    #     images, labels = next(iter(train_loader))
+    #     img_grid = torchvision.utils.make_grid(images[:25])
+    #     writer.add_image('mnist_images', img_grid)
+    #     transform_params = str(data_loader.train_transforms)
+    #     writer.add_text('transforms/train', transform_params)
     
-    log_transforms()
+    # log_transforms()
     
     train_losses = []
     train_accuracy = []
@@ -86,10 +79,10 @@ def run_model(model,device,batch_size,epochs,optimizer,scheduler,use_scheduler,b
     print(summary(model, (1,28, 28 )))
     _ = receptive_field(model,28)
 
-    # Add experiment metadata
-    writer.add_text('Experiment/Version', version)
-    writer.add_text('Experiment/DateTime', timestamp)
-    writer.add_text('Experiment/Notes', notes)
+    # Comment out experiment metadata logging
+    # writer.add_text('Experiment/Version', version)
+    # writer.add_text('Experiment/DateTime', timestamp)
+    # writer.add_text('Experiment/Notes', notes)
     
     for EPOCHS in range(0,epochs):
         train_loss, train_acc = training(model,device,train_loader,optimizer,EPOCHS)
@@ -100,25 +93,25 @@ def run_model(model,device,batch_size,epochs,optimizer,scheduler,use_scheduler,b
         test_accuracy.append(test_acc)
         test_losses.append(test_loss)
         
-        # Enhanced tensorboard logging
-        writer.add_scalars('Loss', {
-            'train': train_loss,
-            'test': test_loss
-        }, EPOCHS)
+        # Comment out tensorboard logging in training loop
+        # writer.add_scalars('Loss', {
+        #     'train': train_loss,
+        #     'test': test_loss
+        # }, EPOCHS)
         
-        writer.add_scalars('Accuracy', {
-            'train': train_acc,
-            'test': test_acc
-        }, EPOCHS)
+        # writer.add_scalars('Accuracy', {
+        #     'train': train_acc,
+        #     'test': test_acc
+        # }, EPOCHS)
         
-        writer.add_scalar('Learning_Rate', current_lr, EPOCHS)
+        # writer.add_scalar('Learning_Rate', current_lr, EPOCHS)
         
-        # Log model weights histograms periodically
-        if EPOCHS % 5 == 0:  # Log every 5 epochs
-            for name, param in model.named_parameters():
-                writer.add_histogram(f'Parameters/{name}', param.data, EPOCHS)
-                if param.grad is not None:
-                    writer.add_histogram(f'Gradients/{name}', param.grad, EPOCHS)
+        # Comment out model weights histogram logging
+        # if EPOCHS % 5 == 0:
+        #     for name, param in model.named_parameters():
+        #         writer.add_histogram(f'Parameters/{name}', param.data, EPOCHS)
+        #         if param.grad is not None:
+        #             writer.add_histogram(f'Gradients/{name}', param.grad, EPOCHS)
         
         if (scheduler_type == 'reducelronplateau') & (use_scheduler ==True):
             scheduler.step(test_loss)
@@ -153,24 +146,24 @@ def run_model(model,device,batch_size,epochs,optimizer,scheduler,use_scheduler,b
             print(f"Model saving failed: {e}")
 
         print(f"LR: {current_lr}\n")
-    # Log final model metrics
-    writer.add_hparams(
-        {
-            'batch_size': batch_size,
-            'epochs': epochs,
-            'optimizer': type(optimizer).__name__,
-            'scheduler': str(scheduler_type) if use_scheduler else 'None',
-            'learning_rate': lrs[0]
-        },
-        {
-            'hparam/best_train_acc': max(train_accuracy),
-            'hparam/best_test_acc': max(test_accuracy),
-            'hparam/final_train_loss': train_losses[-1],
-            'hparam/final_test_loss': test_losses[-1]
-        }
-    )
+    # Comment out final metrics logging
+    # writer.add_hparams(
+    #     {
+    #         'batch_size': batch_size,
+    #         'epochs': epochs,
+    #         'optimizer': type(optimizer).__name__,
+    #         'scheduler': str(scheduler_type) if use_scheduler else 'None',
+    #         'learning_rate': lrs[0]
+    #     },
+    #     {
+    #         'hparam/best_train_acc': max(train_accuracy),
+    #         'hparam/best_test_acc': max(test_accuracy),
+    #         'hparam/final_train_loss': train_losses[-1],
+    #         'hparam/final_test_loss': test_losses[-1]
+    #     }
+    # )
     
-    writer.close()
+    # writer.close()
     return model,train_losses, train_accuracy,test_losses,test_accuracy
 
 

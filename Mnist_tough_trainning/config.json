@@ -3,7 +3,7 @@
     "best_model":0.993,
     "training": {
         "batch_size": 128,
-        "epochs": 20,
+        "epochs": 1,
         "start_lr": [1e-1],
         "end_lr": [2],
         "loss_type": "nll",
