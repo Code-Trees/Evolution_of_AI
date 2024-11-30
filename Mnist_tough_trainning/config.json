@@ -1,0 +1,15 @@
+{
+    "seed":43,
+    "best_model":0.993,
+    "training": {
+        "batch_size": 128,
+        "epochs": 20,
+        "start_lr": [1e-1],
+        "end_lr": [2],
+        "loss_type": "nll",
+        "use_scheduler":1 ,
+        "runlr_finer":1,
+        "scheduler_type": "reducelronplateau",
+        "lr_iter": 4500
+    }
+}

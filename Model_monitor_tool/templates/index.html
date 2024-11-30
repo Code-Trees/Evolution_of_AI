@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/@hpcc-js/wasm@1.20.0/dist/index.min.js"></script>
+    <script src="https://unpkg.com/d3-graphviz@4.0.0/build/d3-graphviz.js"></script>
+    <style>
+        /* Add tab styling here to avoid additional CSS file */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tabs {
+            margin-bottom: 20px;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #f8f9fa;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background-color: #fff;
+            border-bottom: 2px solid #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="text-center mb-4">
+            <h1>Neural Network Dashboard</h1>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Model 1 Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="conv1_channels_1">Conv1 Out Channels:</label>
+                            <input type="number" id="conv1_channels_1" class="form-control" value="16" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="conv2_channels_1">Conv2 Out Channels:</label>
+                            <input type="number" id="conv2_channels_1" class="form-control" value="32" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="conv3_channels_1">Conv3 Out Channels:</label>
+                            <input type="number" id="conv3_channels_1" class="form-control" value="64" min="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Model 2 Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="conv1_channels_2">Conv1 Out Channels:</label>
+                            <input type="number" id="conv1_channels_2" class="form-control" value="16" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="conv2_channels_2">Conv2 Out Channels:</label>
+                            <input type="number" id="conv2_channels_2" class="form-control" value="32" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="conv3_channels_2">Conv3 Out Channels:</label>
+                            <input type="number" id="conv3_channels_2" class="form-control" value="64" min="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Tab Buttons -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="training">Training Monitor</button>
+            <button class="tab-button" data-tab="visualization">Model Visualization</button>
+        </div>
+
+        <!-- Training Monitor Tab -->
+        <div id="training-tab" class="tab-content active">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="epochNumber">Number of Epochs:</label>
+                        <input type="number" id="epochNumber" min="1" max="100" value="20" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="learningRate">Learning Rate:</label>
+                        <input type="number" id="learningRate" step="0.001" value="0.01" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="batchSize">Batch Size:</label>
+                        <input type="number" id="batchSize" min="1" value="128" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="optimizer">Select Optimizer:</label>
+                <select id="optimizer" class="form-control">
+                    <option value="SGD">SGD</option>
+                    <option value="Adam">Adam</option>
+                    <option value="RMSprop">RMSprop</option>
+                    <option value="Adagrad">Adagrad</option>
+                    <!-- Add more optimizers as needed -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="augmentation">Select Augmentation:</label>
+                <select id="augmentation" class="form-control">
+                    <option value="none">None</option>
+                    <option value="rotation">Rotation</option>
+                    <option value="translation">Translation</option>
+                    <option value="scaling">Scaling</option>
+                    <option value="flipping">Flipping</option>
+                </select>
+                <div id="augmentation-params" class="mt-2">
+                    <!-- Parameters will be dynamically added here -->
+                </div>
+                <button id="addAugmentation" class="btn btn-primary mt-2">Add Augmentation</button>
+            </div>
+            <div class="text-center">
+                <button id="trainButton" class="btn btn-success">Start Training</button>
+                <button id="stopButton" class="btn btn-danger" disabled>Stop Training</button>
+                <button id="resetButton" class="btn btn-secondary">Reset</button>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Loss Chart - Model 1</h5>
+                            <div style="height: 300px;">
+                                <canvas id="lossChart1"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Loss Chart - Model 2</h5>
+                            <canvas id="lossChart2"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Accuracy Chart - Model 1</h5>
+                            <canvas id="accuracyChart1"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Accuracy Chart - Model 2</h5>
+                            <canvas id="accuracyChart2"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="terminal-container mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        Training Logs
+                        <button class="btn btn-danger btn-sm float-right clear-logs">Clear</button>
+                    </div>
+                    <div id="terminal" class="card-body" style="height: 200px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <div class="card samples-container">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sample Predictions</h5>
+                    <div>
+                        <span id="autoUpdateStatus" class="mr-3">Auto-update: ON</span>
+                        <button id="toggleAutoUpdate" class="btn btn-sm btn-outline-primary mr-2">Toggle Auto-update</button>
+                        <button id="updateSamples" class="btn btn-sm btn-primary">Update Now</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Model 1 Predictions -->
+                    <div class="model-section">
+                        <h5>Model 1</h5>
+                        <div class="predictions-row">
+                            <div id="model1-wrong"></div>
+                            <div id="model1-correct"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Model 2 Predictions -->
+                    <div class="model-section">
+                        <h5>Model 2</h5>
+                        <div class="predictions-row">
+                            <div id="model2-wrong"></div>
+                            <div id="model2-correct"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Visualization Tab -->
+        <div id="visualization-tab" class="tab-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Model Architecture</h5>
+                            <div id="model-architecture" class="visualization-container">
+                                <!-- Model architecture visualization will go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Layer Activations</h5>
+                            <div id="layer-activations" class="visualization-container">
+                                <!-- Layer activations visualization will go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Weight Distributions</h5>
+                            <div id="weight-distributions" class="visualization-container">
+                                <!-- Weight distributions visualization will go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Feature Maps</h5>
+                            <div id="feature-maps" class="visualization-container">
+                                <!-- Feature maps visualization will go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    const tabId = `${button.dataset.tab}-tab`;
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
+</body>
+</html> 
