@@ -1,0 +1,51 @@
+name: MNIST Training Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Mnist_tough_trainning/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Mnist_tough_trainning/**'
+  workflow_dispatch:
+
+jobs:
+  test-and-train:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      working-directory: ./Mnist_tough_trainning
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+        pip install -r requirements.txt
+
+    - name: Run tests
+      working-directory: ./Mnist_tough_trainning
+      run: |
+        python -m pytest tests/test_model.py -v
+
+    - name: Run training
+      working-directory: ./Mnist_tough_trainning
+      run: |
+        python run.py
+
+    - name: Archive results
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: training-results
+        path: |
+          Mnist_tough_trainning/model_folder/
+          Mnist_tough_trainning/runs/
