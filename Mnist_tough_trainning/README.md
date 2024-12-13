@@ -324,6 +324,10 @@ Max Train Accuracy:  0.9090833333333334
 
 Max Test Accuracy:  0.9675
 
+## Git Action logs: Passed
+
+![Screenshot from 2024-11-30 18-39-20](https://github.com/user-attachments/assets/55f87fed-22c3-4f27-bb94-c278142441be)
+
 
 
 
