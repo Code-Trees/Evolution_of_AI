@@ -4,7 +4,7 @@
 
 
 
-Go to main Read me : [Link Text](README.md)
+Go to main Read me : [Link Text](https://github.com/Code-Trees/Evolution_of_AI/blob/main/Best_way_model_building/README.md)
 
 
 
