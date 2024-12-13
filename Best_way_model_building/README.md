@@ -22,9 +22,255 @@
 
 
 
-Training in aw 
+# Training in AWS EC2 instance 
+
+Configured One AWS EC2 Spot as below Config 
+
+![Aws_config](Step6_Making_the_Final_Model_P_reduce/readme_images/Aws_config.png)
 
 
+
+![Screenshot from 2024-12-13 14-45-08](Step6_Making_the_Final_Model_P_reduce/readme_images/Screenshot from 2024-12-13 14-45-08.png)
+
+I prefer to login to SSH  So configured the Host in my local Linux  and pushing the files using SCP
+
+![aws_login](Step6_Making_the_Final_Model_P_reduce/readme_images/aws_login.png)
+
+![SCP_Files_toAWS](Step6_Making_the_Final_Model_P_reduce/readme_images/SCP_Files_toAWS.png)
+
+**Once login By the help of Shell script i was able to install the Packages from requirement.txt** 
+
+```shell
+#!/bin/bash
+
+# Shell script to install Python dependencies from requirements.txt
+# Function to check if a command exists
+
+sudo apt-get update
+sudo apt-get install python3-pip
+sudo apt-get install python3.12-venv
+
+sudo apt-get autoremove --purge
+sudo apt-get clean
+
+python3 -m venv era
+source era/bin/activate
+
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check if Python is installed
+if ! command_exists python3; then
+    echo "Python3 is not installed. Please install Python3 and try again."
+    exit 1
+fi
+
+# Check if pip is installed
+if ! command_exists pip3; then
+    echo "pip is not installed. Installing pip..."
+    python3 -m ensurepip --upgrade || { echo "Failed to install pip. Exiting."; exit 1; }
+fi
+
+# Upgrade pip
+echo "Upgrading pip..."
+pip3 install --upgrade pip
+
+# Install requirements
+if [ -f "requirements.txt" ]; then
+    echo "Installing dependencies from requirements.txt..."
+    pip3 install -r requirements.txt || { echo "Failed to install some dependencies."; exit 1; }
+    echo "Dependencies installed successfully."
+else
+    echo "requirements.txt not found. Exiting."
+    exit 1
+fi
+
+pip install https://download.pytorch.org/whl/cu118
+```
+
+
+
+Training Starts with simple script as python3 run.py
+
+<img src="/home/jd/Desktop/ERA/Evolution_of_AI/Best_way_model_building/Step6_Making_the_Final_Model_P_reduce/readme_images/Aws_train_accuracy.png" alt="Aws_train_accuracy" style="zoom:80%;" />
+
+Below  is the Full Log:
+
+```bash
+(era) ubuntu@ip-172-31-12-28:~/Step6_Making_the_Final_Model_P_reduce$ python3 run.py 
+Downloading http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+Failed to download (trying next):
+HTTP Error 403: Forbidden
+
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz to .data/MNIST/raw/train-images-idx3-ubyte.gz
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 9.91M/9.91M [00:02<00:00, 4.69MB/s]
+Extracting .data/MNIST/raw/train-images-idx3-ubyte.gz to .data/MNIST/raw
+
+Downloading http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
+Failed to download (trying next):
+HTTP Error 403: Forbidden
+
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz to .data/MNIST/raw/train-labels-idx1-ubyte.gz
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 28.9k/28.9k [00:00<00:00, 157kB/s]
+Extracting .data/MNIST/raw/train-labels-idx1-ubyte.gz to .data/MNIST/raw
+
+Downloading http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz
+Failed to download (trying next):
+HTTP Error 403: Forbidden
+
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz to .data/MNIST/raw/t10k-images-idx3-ubyte.gz
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 1.65M/1.65M [00:01<00:00, 1.28MB/s]
+Extracting .data/MNIST/raw/t10k-images-idx3-ubyte.gz to .data/MNIST/raw
+
+Downloading http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz
+Failed to download (trying next):
+HTTP Error 403: Forbidden
+
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz
+Downloading https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz to .data/MNIST/raw/t10k-labels-idx1-ubyte.gz
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 4.54k/4.54k [00:00<00:00, 20.0MB/s]
+Extracting .data/MNIST/raw/t10k-labels-idx1-ubyte.gz to .data/MNIST/raw
+
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 1500/1500 [00:52<00:00, 28.71it/s]
+Learning rate search finished. See the graph with {finder_name}.plot()
+LR suggestion: steepest gradient
+Suggested LR: 1.05E-01
+Loss: 0.08217247137459123 LR: 0.10512313373669245
+[0.10512313373669245]
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1           [-1, 10, 26, 26]              90
+       BatchNorm2d-2           [-1, 10, 26, 26]              20
+              ReLU-3           [-1, 10, 26, 26]               0
+           Dropout-4           [-1, 10, 26, 26]               0
+            Conv2d-5           [-1, 10, 24, 24]             900
+       BatchNorm2d-6           [-1, 10, 24, 24]              20
+              ReLU-7           [-1, 10, 24, 24]               0
+           Dropout-8           [-1, 10, 24, 24]               0
+            Conv2d-9           [-1, 15, 22, 22]           1,350
+      BatchNorm2d-10           [-1, 15, 22, 22]              30
+             ReLU-11           [-1, 15, 22, 22]               0
+          Dropout-12           [-1, 15, 22, 22]               0
+        MaxPool2d-13           [-1, 15, 11, 11]               0
+           Conv2d-14           [-1, 10, 11, 11]             150
+      BatchNorm2d-15           [-1, 10, 11, 11]              20
+             ReLU-16           [-1, 10, 11, 11]               0
+          Dropout-17           [-1, 10, 11, 11]               0
+           Conv2d-18             [-1, 10, 9, 9]             900
+      BatchNorm2d-19             [-1, 10, 9, 9]              20
+             ReLU-20             [-1, 10, 9, 9]               0
+          Dropout-21             [-1, 10, 9, 9]               0
+           Conv2d-22             [-1, 10, 7, 7]             900
+      BatchNorm2d-23             [-1, 10, 7, 7]              20
+             ReLU-24             [-1, 10, 7, 7]               0
+          Dropout-25             [-1, 10, 7, 7]               0
+           Conv2d-26             [-1, 10, 5, 5]             900
+      BatchNorm2d-27             [-1, 10, 5, 5]              20
+             ReLU-28             [-1, 10, 5, 5]               0
+          Dropout-29             [-1, 10, 5, 5]               0
+AdaptiveAvgPool2d-30             [-1, 10, 1, 1]               0
+================================================================
+Total params: 5,340
+Trainable params: 5,340
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.70
+Params size (MB): 0.02
+Estimated Total Size (MB): 0.73
+----------------------------------------------------------------
+None
+Train ==> Epochs: 0 Batch:  468 loss: 0.07435842603445053 Accuracy: 93.55% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.87it/s]
+Test ==> Epochs: 0 Batch:  78 loss: 0.04681931144967675 Accuracy: 98.60% : 100%|██████████████████████████████| 79/79 [00:01<00:00, 66.69it/s]
+Insufficient test accuracy data.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 1 Batch:  468 loss: 0.08549106121063232 Accuracy: 97.24% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.95it/s]
+Test ==> Epochs: 1 Batch:  78 loss: 0.03777276965342462 Accuracy: 98.83% : 100%|██████████████████████████████| 79/79 [00:01<00:00, 66.48it/s]
+Conditions not met for saving the model.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 2 Batch:  468 loss: 0.04890625551342964 Accuracy: 97.56% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.94it/s]
+Test ==> Epochs: 2 Batch:  78 loss: 0.032260946580767634 Accuracy: 99.02% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 66.80it/s]
+Conditions not met for saving the model.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 3 Batch:  468 loss: 0.10106357932090759 Accuracy: 97.82% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.87it/s]
+Test ==> Epochs: 3 Batch:  78 loss: 0.026358474833518268 Accuracy: 99.27% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 66.52it/s]
+Conditions not met for saving the model.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 4 Batch:  468 loss: 0.026167331263422966 Accuracy: 97.94% : 100%|█████████████████████████| 469/469 [00:16<00:00, 28.47it/s]
+Test ==> Epochs: 4 Batch:  78 loss: 0.02597363870739937 Accuracy: 99.26% : 100%|██████████████████████████████| 79/79 [00:01<00:00, 66.26it/s]
+Conditions not met for saving the model.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 5 Batch:  468 loss: 0.03419866785407066 Accuracy: 97.96% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.58it/s]
+Test ==> Epochs: 5 Batch:  78 loss: 0.02787074487283826 Accuracy: 99.15% : 100%|██████████████████████████████| 79/79 [00:01<00:00, 66.55it/s]
+Conditions not met for saving the model.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 6 Batch:  468 loss: 0.10570023208856583 Accuracy: 98.14% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.40it/s]
+Test ==> Epochs: 6 Batch:  78 loss: 0.022025825706589966 Accuracy: 99.24% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 65.17it/s]
+Conditions not met for saving the model.
+LR: 0.10512313373669245
+
+Train ==> Epochs: 7 Batch:  468 loss: 0.14109759032726288 Accuracy: 98.23% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.54it/s]
+Test ==> Epochs: 7 Batch:  78 loss: 0.018743320024013518 Accuracy: 99.41% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 65.24it/s]
+Target Achieved: 99.41% Test Accuracy!!
+LR: 0.10512313373669245
+
+Train ==> Epochs: 8 Batch:  468 loss: 0.026286490261554718 Accuracy: 98.28% : 100%|█████████████████████████| 469/469 [00:16<00:00, 28.49it/s]
+Test ==> Epochs: 8 Batch:  78 loss: 0.020434861610084773 Accuracy: 99.46% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 65.36it/s]
+Target Achieved: 99.46% Test Accuracy!!
+LR: 0.10512313373669245
+
+Train ==> Epochs: 9 Batch:  468 loss: 0.27364593744277954 Accuracy: 98.27% : 100%|██████████████████████████| 469/469 [00:16<00:00, 28.47it/s]
+Test ==> Epochs: 9 Batch:  78 loss: 0.02126700376868248 Accuracy: 99.31% : 100%|██████████████████████████████| 79/79 [00:01<00:00, 65.24it/s]
+Conditions not met for saving the model.
+LR: 0.010512313373669245
+
+Train ==> Epochs: 10 Batch:  468 loss: 0.016312947496771812 Accuracy: 98.51% : 100%|████████████████████████| 469/469 [00:16<00:00, 28.36it/s]
+Test ==> Epochs: 10 Batch:  78 loss: 0.01760070739146322 Accuracy: 99.44% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 66.97it/s]
+Conditions not met for saving the model.
+LR: 0.010512313373669245
+
+Train ==> Epochs: 11 Batch:  468 loss: 0.036744456738233566 Accuracy: 98.62% : 100%|████████████████████████| 469/469 [00:16<00:00, 28.47it/s]
+Test ==> Epochs: 11 Batch:  78 loss: 0.01742572971335612 Accuracy: 99.48% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 67.50it/s]
+Target Achieved: 99.48% Test Accuracy!!
+LR: 0.010512313373669245
+
+Train ==> Epochs: 12 Batch:  468 loss: 0.04616251215338707 Accuracy: 98.63% : 100%|█████████████████████████| 469/469 [00:16<00:00, 28.61it/s]
+Test ==> Epochs: 12 Batch:  78 loss: 0.017792104828730226 Accuracy: 99.47% : 100%|████████████████████████████| 79/79 [00:01<00:00, 67.44it/s]
+Conditions not met for saving the model.
+LR: 0.0010512313373669247
+
+Train ==> Epochs: 13 Batch:  468 loss: 0.04418128728866577 Accuracy: 98.69% : 100%|█████████████████████████| 469/469 [00:16<00:00, 28.56it/s]
+Test ==> Epochs: 13 Batch:  78 loss: 0.016657220529729965 Accuracy: 99.48% : 100%|████████████████████████████| 79/79 [00:01<00:00, 67.45it/s]
+Conditions not met for saving the model.
+LR: 0.0010512313373669247
+
+Train ==> Epochs: 14 Batch:  468 loss: 0.02963978610932827 Accuracy: 98.65% : 100%|█████████████████████████| 469/469 [00:16<00:00, 28.54it/s]
+Test ==> Epochs: 14 Batch:  78 loss: 0.01741125149652362 Accuracy: 99.45% : 100%|█████████████████████████████| 79/79 [00:01<00:00, 65.72it/s]
+Conditions not met for saving the model.
+LR: 0.0010512313373669247
+
+Max Train Accuracy:  0.9869
+Max Test Accuracy:  0.9948
+(era) ubuntu@ip-172-31-12-28:~/Step6_Making_the_Final_Model_P_reduce$ hostname -f
+ip-172-31-12-28.ap-south-1.compute.internal
+(era) ubuntu@ip-172-31-12-28:~/Step6_Making_the_Final_Model_P_reduce$ Connection to ec2-13-232-247-219.ap-south-1.compute.amazonaws.com closed by remote host.
+Connection to ec2-13-232-247-219.ap-south-1.compute.amazonaws.com closed.
+(base) jd@jd:~$ 
+
+```
+
+# Local Ubuntu Log 
 
 
 

@@ -2,7 +2,7 @@
 
 # 					![Build Status](https://github.com/Code-Trees/mnist_ops/actions/workflows/python-app.yml/badge.svg)
 
-
+Go to main Read me : [Link Text](README.md)
 
 # Model Architecture
 
