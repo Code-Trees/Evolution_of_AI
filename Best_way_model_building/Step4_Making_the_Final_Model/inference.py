@@ -10,8 +10,8 @@ from model import Net
 import json
 import os
 import sys
-from data_loader import MNISTDataLoader
-from torchvision import datasets, transforms
+from utils.data_loader import MNISTDataLoader
+from torchvision import datasets
 from torch.utils.data import Dataset, ConcatDataset
 import matplotlib.pyplot as plt
 
