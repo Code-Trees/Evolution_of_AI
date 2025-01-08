@@ -16,7 +16,7 @@
 
 **Step 3: Reduce parameter [Link Text](Step3_Reduce_parameter/README.md)**
 
-**Step 4: Making the Final Model Parameter reduced Added LrFinder  [Link Text](Step5_Making_the_Final_Model_param/README.md)**
+**Step 4: Making the Final Model Parameter reduced Added LrFinder  [Link Text](Step4_Making_the_Final_Model/README.md)**
 
 **Step 5: Go Beyond Receptive Field  68 [Link Text](Step6_Making_the_Final_Model_P_reduce/README.md)**
 
@@ -93,7 +93,7 @@ pip install https://download.pytorch.org/whl/cu118
 
 Training Starts with simple script as python3 run.py
 
-<img src="/home/jd/Desktop/ERA/Evolution_of_AI/Best_way_model_building/Step6_Making_the_Final_Model_P_reduce/readme_images/Aws_train_accuracy.png" alt="Aws_train_accuracy" style="zoom:80%;" />
+<img src="Step6_Making_the_Final_Model_P_reduce/readme_images/Aws_train_accuracy.png" alt="Aws_train_accuracy" style="zoom:80%;" />
 
 Below  is the Full Log:
 

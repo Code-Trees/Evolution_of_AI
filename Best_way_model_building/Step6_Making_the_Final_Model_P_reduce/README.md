@@ -1,12 +1,7 @@
 # Target: Achieved 99.55% accuracy  in 5,340 parameters in 12th iteration
-
-
-
-Go to main Read me : [Link Text](README.md)
-
-
-
 ![Build Status](https://github.com/Code-Trees/mnist_ops/actions/workflows/python-app.yml/badge.svg)
+
+Go to main Read me : [Link Text](https://github.com/Code-Trees/Evolution_of_AI/blob/main/Best_way_model_building/README.md)
 
 ```python
 ----------------------------------------------------------------
